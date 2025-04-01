@@ -74,3 +74,38 @@ fn constructor(admin:ContractAddress,platform_fee:u16,ref self:ContractState){
    self.listing_count.write(0);
    self.orders_count.wrote(0);
 }
+
+#[external(v0)]
+impl  MarketplaceImpl of IMarketplace<ContractState> {
+    fn create_listing(
+        ref self ContractState,
+        title:felt252,
+        description:felt252,
+        price:u256,
+        quantity:u64,
+        token_address:ContractAddress
+    ) -> u64 {
+        let caller = get_caller_address();
+        let current_time = get_block_timestamp();
+        let lisitng_id = self.listing_count.read();
+
+        let new_listing = Listing{
+            id:lisitng_id,
+            seller:caller,
+            title,
+            description,
+            quantity,
+            total_price,
+            token_address,
+            is_active:true,
+            created_at:current_time,
+        };
+
+        self.listings.write(lisitng_id,new_listing);
+        self.listing_count(lisitng_id);
+
+        let user_listing_key = self.users_listings.read(caller,0)
+    
+
+    }
+}
