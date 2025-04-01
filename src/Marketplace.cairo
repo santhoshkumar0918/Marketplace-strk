@@ -56,6 +56,21 @@ struct storage{
     users:Legacymap::<ContractAddress,user>,
     users_listings:Legacymap::<(ContractAddress,u64),u64>,
     users_orders:Legacymap::<(ContractAddress,u64),u64>,
-    platform_fee:u64,
+    platform_fee:u16,
     admin:ContractAddress,
+}
+
+mod errors{
+    const INVALID_LISTING:felt252 = "Invalid listing";
+    const INVALID_ORDER:felt252 = "Invalid order";
+    const UNAUTHORIZED:felt252 = "Unauthorized";
+    const INSUFFICIENT_BALANCE:felt252 = "Insufficient balance";
+}
+
+#[constructor]
+fn constructor(admin:ContractAddress,platform_fee:u16,ref self:ContractState){
+   self.admin.write(admin);
+   self.platform_fee.write(platform_fee);
+   self.listing_count.write(0);
+   self.orders_count.wrote(0);
 }
