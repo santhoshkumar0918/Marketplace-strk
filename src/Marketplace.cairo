@@ -104,8 +104,35 @@ impl  MarketplaceImpl of IMarketplace<ContractState> {
         self.listings.write(lisitng_id,new_listing);
         self.listing_count(lisitng_id);
 
-        let user_listing_key = self.users_listings.read(caller,0)
-    
+        let user_listing_key = self.users_listings.read((caller,0));
+        self.users_listings.write((caller,user_listing_key+1),lisitng_id);
+        self.users_listings.write((caller,0)user_listing_key+1);
+        
+        self.emit(Event::ListingCreated(ListingCreated{
+            lisitng_id,
+            seller:caller,
+            price,
+        }))
+        lisitng_id
 
     }
+
+    fn complete_order(ref self :ContractState , order_id:u64){
+        let caller = get_caller_address();
+        
+        let mut order = self.orders.read(orders_id)
+        assert(order_id == 0,errors::INVALID_ORDER);
+        assert(order.buyer == caller, errors::UNAUTHORIZED);
+        assert(order.status == OrderStatus::Pending, errors::INVALID_ORDER);
+
+        order.status = OrderStatus::Completed;
+        self.orders.write(order_id,order);
+
+        self.emit(Event::OrderUpdated(OrderUpdated{
+            order_id,
+            status:OrderStatus::Completed,
+        }))
+
+    }
+
 }
