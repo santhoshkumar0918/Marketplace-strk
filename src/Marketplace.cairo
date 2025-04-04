@@ -138,6 +138,37 @@ impl  MarketplaceImpl of IMarketplace<ContractState> {
             status:OrderStatus::Pending,
             created_at:current_time,
         }
+         listing.quantity = listing.quantity - quantity;
+            if listing.quantity == 0 {
+                listing.is_active = false;
+            }
+            
+          
+            self.orders.write(order_id, new_order);
+            self.order_count.write(order_id);
+            self.listings.write(listing_id, listing);
+            
+            let user_order_count = self.user_orders.read((caller, 0));
+            self.user_orders.write((caller, 0), user_order_count + 1);
+            self.user_orders.write((caller, user_order_count + 1), order_id);
+            
+          
+            self.emit(Event::ListingUpdated(ListingUpdated {
+                listing_id,
+                is_active: listing.is_active,
+                quantity: listing.quantity,
+            }));
+            
+            self.emit(Event::OrderCreated(OrderCreated {
+                order_id,
+                listing_id,
+                buyer: caller,
+                seller: listing.seller,
+                quantity,
+                total_price,
+            }));
+            
+            order_id
 
     }
 
