@@ -117,6 +117,30 @@ impl  MarketplaceImpl of IMarketplace<ContractState> {
 
     }
 
+    fn buy(ref  self : ContractState, lisitng_id :u64, quantity:u64){
+        let caller = get_caller_address();
+        let current_time = get_block_timestamp();
+
+        let mut listing = self.listings.read(listing_id);
+        assert(listing.id == listing_id,errors::INVALID_LISTING);
+        assert(listing.is_active,errors::INVALID_LISTING);
+        assert(listing.quantity >= quantity, errors:INSUFFICIENT_QUANTITY);
+
+        let order_id = self.orders_count.read();
+        let total_price = lisitng.price * quantity.into();
+
+        let new_order = Order{
+            id:order_id,
+            listing_id,
+            buyer:caller,
+            seller:listing_seller,
+            total_price,
+            status:OrderStatus::Pending,
+            created_at:current_time,
+        }
+
+    }
+
     fn complete_order(ref self :ContractState , order_id:u64){
         let caller = get_caller_address();
         
